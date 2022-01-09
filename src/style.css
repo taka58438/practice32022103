@@ -6,3 +6,44 @@ img{
 .board-row{
     display: flex;
 }
+
+.panels{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+
+.clicked{
+    
+    border-color: blue;
+    border-style: solid;
+}
+
+.clear{
+    position:relative;
+    border-color:blue;
+    border-style: solid;
+}
+
+.failure{
+    position:relative;
+    border-color:red;
+    border-style: solid;
+}
+
+.clear p{
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: blue;
+    font-size: 40px;
+}
+
+.failure p{
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: red;
+    font-size: 40px;
+}
