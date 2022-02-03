@@ -4,13 +4,18 @@ import { render } from "react-dom";
 
 import './style.css';
 
-function Header() {
+function Header(props) {
     return (
       <header className="hero is-dark is-bold">
         <div className="hero-body">
           <div className="container">
             <h1 className="title">Guess The Same Artist</h1>
-            <p>作者が同じ作品を当てるゲーム</p>
+            <div className = "menu">
+              <p>作者が同じ作品を当てるゲーム</p>
+              <div className = "reStartBotton">
+              <button onClick={props.onClick}>Restart</button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -168,7 +173,7 @@ function Main(){
   const [hasImageObjectList , sethasImageObjectList ] = useState(null);
   const [cards , setCards] = useState(null);
   const [nowSelect, setNowSelect] = useState(null);
-  const [game , setGame] = useState(null);
+  const [game , setGame] = useState("playing");
   useEffect( ()=>{
     getIDList().then( (IDs)=>{
       sethasImageObjectList(IDs);
@@ -177,7 +182,8 @@ function Main(){
   } , [] );
 
   useEffect( ()=> {
-    getCards(4 , hasImageObjectList).then( (data)=>{
+    //何枚のカードを表示するか
+    getCards(6 , hasImageObjectList).then( (data)=>{
       console.log(data);
       //２枚ずつ得たカードを切り分ける
       //配列中の配列をバラバラにする方法はmapをさらにmapしてpushする.
@@ -197,18 +203,64 @@ function Main(){
 
   useEffect( ()=> {
     let clear = true;
+    let failure = true;
     if(cards != null){
       cards.map(  (card)=>{
+        if(card.status == null){
+          failure = false;
+        }
         if(card.status != "clear"){
           clear =false;
         }
       });
       if(clear == true){
         setGame("clear");
-        console.log("clear");
+      }else if(failure == true && clear != true){
+        setGame("failure");
       }
     }
   } , [cards]);
+
+  function Restart(){
+    setGame("playing");
+    setCards(null);
+    getIDList().then( (IDs)=>{
+      sethasImageObjectList(IDs);
+      console.log("IDs",IDs);
+    })
+    
+  }
+
+  function Modal(props){
+    const game = props.game
+    if(game == "playing"){
+      return null
+    }
+    let panel_count=0;
+    let score=0;
+    cards.forEach(card => {
+      panel_count++;
+      if(card.status == "clear"){
+        score++;
+      }
+    });
+
+    return (
+        <div id = "overlay">
+        <div id = "content1">
+          <p id="game">{game}</p>
+          <p id ="score1">{score}/{panel_count}</p>
+          
+          <div className="reStartBotton">
+            <button onClick = { ()=> { setGame("playing")}}>close</button>
+            <button onClick ={Restart} >Restart</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  
 
   function searchSameArtist(num){
     let response = null;
@@ -261,6 +313,7 @@ function Main(){
       console.log("clicked",new_cards[num]);
     }
 
+
     
     const {cards} = props;
     if(cards == null){
@@ -268,6 +321,7 @@ function Main(){
     }
     //return (<div><img src ={cards[0].url1} alt="pic"/></div>);
     return(
+      
       <div className ="panels">
         {
           cards.map( (card,index)=>{
@@ -316,10 +370,16 @@ function Main(){
 
   
 
+  
+
   return (
     <main>
+      <Header onClick={Restart} />
       <div>
         <RenderCards cards={cards} />
+      </div>
+      <div>
+          <Modal game = {game} />
       </div>
     </main>
   );
@@ -329,7 +389,6 @@ function Main(){
 function App(){
     return(
         <div>
-            <Header />
             <Main />
             <Footer />
         </div>
